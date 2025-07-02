@@ -37,18 +37,19 @@ class CustomMySQLConnector:
             articles = json.load(file)
 
         insert_sql = """
-            INSERT INTO article (url, content, title, created_time)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO article (url, content, title, created_time, publisher)
+            VALUES (%s, %s, %s, %s, %s)
         """
 
         success_count = 0
         for a in articles:
             try:
                 cursor.execute(insert_sql, (
-                    a.get("URL", ""),
-                    a.get("본문", ""),
-                    a.get("기사제목", ""),
-                    a.get("작성일자", "")
+                    a.get("URL", "추출 실패"),
+                    a.get("본문", "추출 실패"),
+                    a.get("기사제목", "추출 실패"),
+                    a.get("작성일자", "추출 실패"),
+                    a.get("신문사", "추출 실패")
                 ))
                 success_count += 1
             except pymysql.MySQLError as e:

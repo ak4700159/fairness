@@ -7,82 +7,102 @@ from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
 
-# ✅ 크롬 옵션 설정
-options = Options()
-# options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
+class NaverNewsCrawler:
+    def __init__(self, base_url="https://n.news.naver.com/section/100", max_clicks=10):
+        self.base_url = base_url
+        self.max_clicks = max_clicks
+        self.driver = None
+        self.wait = None
+        self.article_links = []
+        self.results = []
 
-driver = webdriver.Chrome(service=Service(), options=options)
-wait = WebDriverWait(driver, 10)
+    def setup_driver(self):
+        options = Options()
+        # options.add_argument('--headless')  # UI 숨기기 옵션 제거 
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        self.driver = webdriver.Chrome(service=Service(), options=options)
+        self.wait = WebDriverWait(self.driver, 10)
+        print("✅ WebDriver 초기화 완료")
 
-# ✅ 메인 페이지 진입 및 기사 링크 수집
-driver.get("https://n.news.naver.com/section/100")
+    def collect_article_links(self):
+        print("📍 기사 링크 수집 시작")
+        self.driver.get(self.base_url)
 
-# '더보기' 버튼 클릭 3번
-for _ in range(10):
-    try:
-        more_btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "a.section_more_inner._CONTENT_LIST_LOAD_MORE_BUTTON")))
-        driver.execute_script("arguments[0].click();", more_btn)
-        time.sleep(1.5)
-    except Exception as e:
-        print("더보기 클릭 실패:", e)
-        break
-
-# 기사 링크 수집
-article_links = list({
-    elem.get_attribute("href")
-    for elem in driver.find_elements(By.CSS_SELECTOR, "a.sa_text_title._NLOG_IMPRESSION")
-    if elem.get_attribute("href")
-})
-
-print(f"총 기사 수집 링크 수: {len(article_links)}")
-
-# ✅ 각 기사 페이지 접근 후 정보 수집
-results = []
-for url in article_links:
-    try:
-        driver.get(url)
-        wait.until(EC.presence_of_element_located((By.ID, "dic_area")))
-
-        title = driver.find_element(By.CSS_SELECTOR, "h2.media_end_head_headline").text.strip()
-        body = driver.find_element(By.ID, "dic_area").text.strip()
-
-        # 날짜 정보
-        date_span = driver.find_element(By.CSS_SELECTOR, "span.media_end_head_info_datestamp_time._ARTICLE_DATE_TIME")
-        pub_date = date_span.text.strip()
-
-        # 신문사 이름
-        try:
-            # 방식 1: img 태그의 alt 속성으로 가져오기 (가장 정확함)
-            press_logo = driver.find_element(By.CSS_SELECTOR, "a.media_end_linked_title_inner img")
-            press_name = press_logo.get_attribute("alt").strip()
-        except:
+        for i in range(self.max_clicks):
             try:
-                # 방식 2: span 태그의 textContent 가져오기 (fallback)
-                press_name = driver.find_element(
-                    By.CSS_SELECTOR, "span.media_end_linked_title_text.dark_type._LAZY_LOADING_ERROR_SHOW"
-                ).text.strip()
+                more_btn = self.wait.until(EC.element_to_be_clickable(
+                    (By.CSS_SELECTOR, "a.section_more_inner._CONTENT_LIST_LOAD_MORE_BUTTON")
+                ))
+                self.driver.execute_script("arguments[0].click();", more_btn)
+                time.sleep(1.5)
+            except Exception as e:
+                print(f"⚠️ 더보기 클릭 실패 (클릭 {i+1}회):", e)
+                break
+
+        links = {
+            elem.get_attribute("href")
+            for elem in self.driver.find_elements(By.CSS_SELECTOR, "a.sa_text_title._NLOG_IMPRESSION")
+            if elem.get_attribute("href")
+        }
+
+        self.article_links = list(links)
+        print(f"✅ 수집된 기사 링크 수: {len(self.article_links)}")
+
+    def extract_article_data(self, url):
+        try:
+            self.driver.get(url)
+            self.wait.until(EC.presence_of_element_located((By.ID, "dic_area")))
+
+            title = self.driver.find_element(By.CSS_SELECTOR, "h2.media_end_head_headline").text.strip()
+            body = self.driver.find_element(By.ID, "dic_area").text.strip()
+
+            date_span = self.driver.find_element(By.CSS_SELECTOR, "span.media_end_head_info_datestamp_time._ARTICLE_DATE_TIME")
+            pub_date = date_span.text.strip()
+
+            try:
+                press_logo = self.driver.find_element(By.CSS_SELECTOR, "a.media_end_linked_title_inner img")
+                press_name = press_logo.get_attribute("alt").strip()
             except:
-                press_name = ""        
-        print(f"신문사: {press_name}, 제목: {title}, 날짜: {pub_date}")
-        results.append({
-            "신문사": press_name,
-            "기사제목": title,
-            "본문": body,
-            "작성일자": pub_date,
-            "URL": url
-        })
+                try:
+                    press_name = self.driver.find_element(
+                        By.CSS_SELECTOR, "span.media_end_linked_title_text.dark_type._LAZY_LOADING_ERROR_SHOW"
+                    ).text.strip()
+                except:
+                    press_name = ""
 
-        time.sleep(0.5)
-    except Exception as e:
-        print(f"크롤링 실패 ({url}): {e}")
-        continue
+            print(f"📰 {press_name} | {title} | {pub_date}")
 
-# ✅ DataFrame → 엑셀 저장
-df = pd.DataFrame(results)
-df.to_excel("result.xlsx", index=False)
-df.to_json("result.json", orient="records", force_ascii=False)
-print("✅ 엑셀 파일(result.xlsx) 저장 완료")
+            return {
+                "신문사": press_name,
+                "기사제목": title,
+                "본문": body,
+                "작성일자": pub_date,
+                "URL": url
+            }
 
-driver.quit()
+        except Exception as e:
+            print(f"❌ 크롤링 실패 ({url}): {e}")
+            return None
+
+    def collect_articles(self):
+        print("📍 기사 내용 수집 시작")
+        for url in self.article_links:
+            data = self.extract_article_data(url)
+            if data:
+                self.results.append(data)
+            time.sleep(0.5)
+
+    def save_to_file(self, excel_path="result.xlsx", json_path="result.json"):
+        df = pd.DataFrame(self.results)
+        df.to_excel(excel_path, index=False)
+        df.to_json(json_path, orient="records", force_ascii=False)
+        print(f"✅ 저장 완료: {excel_path}, {json_path}")
+
+    def run(self):
+        self.setup_driver()
+        self.collect_article_links()
+        self.collect_articles()
+        self.save_to_file()
+        self.driver.quit()
+        print("🧹 드라이버 종료 및 작업 완료")
