@@ -3,8 +3,9 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 
+
 class ArticleGenerator:
-    def __init__(self):
+    def __init__(self, template):
         # LLM 모델 설정, 이번 년도 4월에 출시한 gpt-4.1 모델을 사용
         self.llm = ChatOpenAI(model="gpt-4.1")
         # JSON 형태로 출력하기 위한 파서 설정
@@ -13,26 +14,22 @@ class ArticleGenerator:
         format_instructions = output_parser.get_format_instructions()
         # 프롬프트 템플릿 설정
         self.prompt_template = PromptTemplate(
-            template="주어진 기사 본문 : {content} " \
-            "\n 기사제목 : {title}를 보고 새로운 기사 본문과 제목를 생성해주세요. " \
-            "주어진 기사의 내용을 바탕으로 작성해야되며 주어진 기사와 비슷한 어조를 사용하고 " \
-            "인터뷰 내용이 있다면 반대되는 의견으로 비슷하게 작성해야됩니다. " \
-            "생성된 본문을 자극적으로 나타내는 기사제목을 작성해야 되고 분량은 원본 분량과 비슷해야합니다." \
-            "\n {format_instructions}",
+            template=template,
             input_variables=["title", "content"],
             partial_variables={"format_instructions": format_instructions},
         )
         self.chain = self.prompt_template | self.llm | output_parser
 
 
-    def generate(self, title, body):
+    # 비동기식 동작
+    async def generate(self, title, body):
         # 한번만 복구 시도 
         try:
-            response = self.chain.invoke({"title": title, "content": body})
+            response = await self.chain.ainvoke({"title": title, "content": body})
         except Exception as e:
             try:
                 print("재시도...")
-                response = self.chain.invoke({"title": title, "content": body})
+                response = await self.chain.ainvoke({"title": title, "content": body})
             except Exception as e:
                 print(f"재시도 중 오류 발생: {e}")
                 response = None
