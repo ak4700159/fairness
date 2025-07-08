@@ -20,8 +20,7 @@ class ArticleGenerator:
         )
         self.chain = self.prompt_template | self.llm | output_parser
 
-
-    # 비동기식 동작
+    # 비동기식 
     async def generate(self, title, body):
         # 한번만 복구 시도 
         try:
