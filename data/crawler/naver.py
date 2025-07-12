@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 import time
+import json
 
 class NaverNewsCrawler:
     def __init__(self, base_url="https://n.news.naver.com/section/100", max_clicks=10):
@@ -106,3 +107,8 @@ class NaverNewsCrawler:
         self.save_to_file()
         self.driver.quit()
         print("🧹 드라이버 종료 및 작업 완료")
+
+if __name__ == "__main__":
+    with open("../new_generated_articles2.json", 'r', encoding='utf-8') as f:
+        articles = json.load(f)
+    print(f"✅ 원본 기사 개수: {len(articles)}")  #
