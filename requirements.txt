@@ -7,3 +7,4 @@ langchain-openai==0.3.27
 langchain-teddynote==0.3.45
 langchain-text-splitters==0.3.8
 pydantic==2.11.7
+selenium==4.34.2
