@@ -19,8 +19,12 @@ from operator import itemgetter
 """
 class KeywordAnalyzer:
     def __init__(self):
-        self.llm = setup.load_gpt_model(r"C:\Users\ksm\Desktop\fairness\config.json")
-        self.criteria = {"평가 기준": "추출된 카테고리가 충분히 다방면으로 해석될 수 있는 카테고리인지 평가하거나 카테고리가 사용자 입력과 연관성이 깊은지를 평가"}
+        self.llm = setup.load_gpt_model(r"config.yaml")
+        self.criteria = {
+            "relevance" : "만약 응답이 입력에 대해 카테고리 별로 분류한 응답인 경우, 추출된 카테고리가 사용자 프롬프트와 관련성이 있는가?",
+            "diversity" : "만약 응답이 입력에 대해 카테고리 별로 분류한 응답인 경우, 카테고리 간 관점이 실제로 상충되는 입장인가?",
+            "nothing" : "입력에 대해 카테고리 별로 분류하지 않았다면(응답 : no/아니요) 이에 대해 충분히 논리적으로 설명하고 있는가?"
+        }
 
     # 전체 체인 구성 
     def run(self, user_prompt):
@@ -31,6 +35,16 @@ class KeywordAnalyzer:
             | StrOutputParser()
         )
         return main_chain.invoke({"user_prompt" : user_prompt})
+    
+    # 비동기 실행
+    async def asyncRun(self, user_prompt):
+        judge_chain = self.getJudgeChain()
+        main_chain = (
+            {"response" : judge_chain, "user_prompt" : itemgetter("user_prompt")}
+            | RunnableLambda(self.route)
+            | StrOutputParser()
+        )
+        return await main_chain.ainvoke({"user_prompt" : user_prompt})
 
     """
         카테고리를 생성하는 체인 생성
@@ -92,11 +106,12 @@ class KeywordAnalyzer:
         응답 분석 후 라우팅 함수
     """
     def route(self, info):
-        # print(f"프롬프트 분석결과 : {info}")
-        if info.get("response").content == "yes":
+        judge_result = info.get("response").content.strip().lower()
+        if judge_result == "yes":
             return self.getCategoryChain()
-        elif info.get("response").content == "no":
+        elif judge_result == "no":
             return self.getReasonChain()
+        # 제대로 응답하지 못한 경우
         return (
             ChatPromptTemplate.from_template(
                 """
@@ -110,7 +125,14 @@ class KeywordAnalyzer:
     """
         응답 결과 평가하기(LLM 모델을 통해 추론)
     """
-    def evaluate(self, prediction, input):
+    async def asyncEvaluate(self, prediction, input, index):
         evaluator = CriteriaEvalChain.from_llm(llm=self.llm, criteria=self.criteria)
-        result = evaluator.evaluate_strings(prediction=prediction, input=input)
-        print(f"score : {result["score"]} / value : {result["value"]}")
+        result = await evaluator.aevaluate_strings(prediction=prediction, input=input)
+        print(f"{index}번째 키워드 평가 결과 : score={result['score']} / value={result['value']}")
+        return {
+            "index" : index,
+            "score" : result['score'],
+            "value" : result['value'],
+            "user_pomrpt" : input,
+            "prediction" : prediction,
+        }

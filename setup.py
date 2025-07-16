@@ -1,14 +1,15 @@
 import os
-import json
+import yaml
 from langchain_teddynote import logging
 from langchain_openai import ChatOpenAI
 
+
 """"
-config_path에 있는 json 파일 기반 프로그램 설정 
+config_path에 있는 yaml 파일 기반 프로그램 설정 
 - open api키 등록
 - langsmith 플랫폼에 프로젝트 등록(추적 및 분석)
 """
-def set_config(config_path='config.json'):
+def set_config(config_path='config.yaml', project_name='fairness'):
     config_path = get_abs_path(config_path)
     required_keys = [
         'OPEN_API_KEY', 'LANGCHAIN_API_KEY',
@@ -22,18 +23,19 @@ def set_config(config_path='config.json'):
         'LANGSMITH_API_KEY': 'LANGSMITH_API_KEY',
         'LANGSMITH_TRACING': 'LANGSMITH_TRACING',
         'LANGSMITH_ENDPOINT': 'LANGSMITH_ENDPOINT',
-        'LANGSMITH_PROJECT': 'LANGSMITH_PROJECT'
+        # 프로젝트 명은 그때마다 설정 
+        # 'LANGSMITH_PROJECT': 'LANGSMITH_PROJECT'
     }
 
     # config 파일 로딩 및 예외처리
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
+            config = yaml.load(f, Loader=yaml.FullLoader)
     except FileNotFoundError:
         print(f"[ERROR] 설정 파일({config_path})을 찾을 수 없습니다.")
         return
-    except json.JSONDecodeError:
-        print(f"[ERROR] 설정 파일({config_path})이 올바른 JSON 형식이 아닙니다.")
+    except yaml.YAMLError:
+        print(f"[ERROR] 설정 파일({config_path})이 올바른 YAML 형식이 아닙니다.")
         return
 
     # 환경변수 세팅 (없으면 경고)
@@ -45,7 +47,7 @@ def set_config(config_path='config.json'):
             print(f"[WARNING] '{config_key}' 값이 설정 파일에 없습니다. 해당 환경변수는 세팅되지 않습니다.")
 
     print("[INFO] 환경변수 세팅이 완료되었습니다.")
-    logging.langsmith("keyword-analyzer project")
+    logging.langsmith(project_name=project_name)
     
 
 """"
@@ -56,12 +58,12 @@ def load_gpt_model(config_path='config.json'):
     # 파일 로딩 
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            config = json.load(f)
+            config = yaml.load(f, Loader=yaml.FullLoader)
     except FileNotFoundError:
         print(f"[ERROR] 설정 파일({config_path})을 찾을 수 없습니다.")
         return
-    except json.JSONDecodeError:
-        print(f"[ERROR] 설정 파일({config_path})이 올바른 JSON 형식이 아닙니다.")
+    except yaml.YAMLError:
+        print(f"[ERROR] 설정 파일({config_path})이 올바른 YAML 형식이 아닙니다.")
         return
     
     # ChatOpenAI에 매핑
