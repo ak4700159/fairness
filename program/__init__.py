@@ -30,6 +30,10 @@ async def main():
     # 테스트 키워드 더미 
     keywords = [
         "윤석열",
+        "길고양이",
+        "길고양이 밥주기",
+        "윤석열 체포 긍정",
+        "윤석열 체포 부정",
         # "RAG",
         # "625 전쟁",
         # "화학 원소란?",
@@ -59,6 +63,6 @@ async def main():
 
 if __name__ == "__main__":
     # 환경변수 설정 
-    setup.set_config(r"config.yaml", "[0716 fair search app] evaluate llm")
-    # main coroutine 실행   
+    setup.set_config(r"config.yaml", "[0717 fair search app] evaluate llm")
+    # main coroutine 실행 
     asyncio.run(main())

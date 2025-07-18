@@ -4,3 +4,4 @@ config.json
 *.zip
 **/test_db/**
 config.yaml
+**/cache/**

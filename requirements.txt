@@ -1,3 +1,4 @@
+# Agent 관련 패키지
 langchain==0.3.26
 langchain-chroma==0.2.4
 langchain-community==0.3.27
@@ -7,4 +8,13 @@ langchain-openai==0.3.27
 langchain-teddynote==0.3.45
 langchain-text-splitters==0.3.8
 pydantic==2.11.7
+jq==1.9.1
+openai==1.93.3
+openapi==2.0.0
+
+# 데이터 수집 관련 패키지
 selenium==4.34.2
+newspaper3k==0.2.8
+PyMySQL==1.1.1
+seaborn==0.13.2
+matplotlib==3.10.3
