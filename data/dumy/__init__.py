@@ -4,7 +4,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_teddynote import logging
 from pydantic import BaseModel, Field
 import sys
-from setup import set_config
+from program.fair_setup import set_env
 import json
 
 class ResponseJson(BaseModel):
@@ -19,7 +19,7 @@ def log_article_result(idx, title, score, reason):
 # 4. 이를 GPT에게 전달해 키워드에 대해 해당 기사글이 부정적인지, 긍정적인지, 알 수 없는지(모호, 중립)를 판단.
 # 5. -1(부정) ~ 0(중립) ~ 1(긍정)으로 수치로 할당
 if __name__ == "__main__":
-    set_config(project_name="07/17 article analyze")
+    set_env(project_name="07/17 article analyze")
     llm = ChatOpenAI(model="gpt-4.1")
     output_parser = JsonOutputParser(pydantic_object=ResponseJson)
     prompt = ChatPromptTemplate.from_template("""

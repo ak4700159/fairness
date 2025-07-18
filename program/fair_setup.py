@@ -1,5 +1,6 @@
 import os
 import yaml
+import pymysql
 from langchain_teddynote import logging
 from langchain_openai import ChatOpenAI
 
@@ -9,13 +10,13 @@ config_path에 있는 yaml 파일 기반 프로그램 설정
 - open api키 등록
 - langsmith 플랫폼에 프로젝트 등록(추적 및 분석)
 """
-def set_config(config_path='config.yaml', project_name='fairness'):
+def set_env(config_path='config.yaml', project_name='fairness'):
     config_path = get_abs_path(config_path)
-    required_keys = [
-        'OPEN_API_KEY', 'LANGCHAIN_API_KEY',
-        'LANGCHAIN_TRACING_V2', 'LANGCHAIN_TRACING',
-        'LANGCHAIN_ENDPOINT', 'LANGCHAIN_PROJECT'
-    ]
+    # required_keys = [
+    #     'OPEN_API_KEY', 'LANGCHAIN_API_KEY',
+    #     'LANGCHAIN_TRACING_V2', 'LANGCHAIN_TRACING',
+    #     'LANGCHAIN_ENDPOINT', 'LANGCHAIN_PROJECT'
+    # ]
 
     # 필수값 체크용 딕셔너리 (환경변수명, config key)
     env_map = {
@@ -80,12 +81,33 @@ def load_gpt_model(config_path='config.json'):
 
 
 """상대 경로를 절대 경로로 변환"""
-def get_abs_path(config_path):
+def get_abs_path(config_path='config.json'):
     return os.path.abspath(config_path)
+
+"""
+    데이터베이스 연결 후 인스턴스 반환
+"""
+def connect_mysql_database(config_path):
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)['database']
+    except FileNotFoundError:
+        print(f"[ERROR] 설정 파일({config_path})을 찾을 수 없습니다.")
+        return
+    except yaml.YAMLError:
+        print(f"[ERROR] 설정 파일({config_path})이 올바른 YAML 형식이 아닙니다.")
+        return    
+    return pymysql.connect(
+                host=config['host'],
+                port=config['port'],
+                user=config['user'],
+                password=config['password'],
+                database=config['database']
+            )
 
 
 # 실행 예시
 if __name__ == "__main__":
     # 이는 일시적인 환경변수 적용일뿐이다.
-    set_config('config.json')
+    set_env('config.json')
     llm = load_gpt_model('config.json')

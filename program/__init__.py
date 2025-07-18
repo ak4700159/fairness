@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-import setup 
+import program.fair_setup as fair_setup 
 import program.keyword_analyzer as ka
 import asyncio
 
@@ -63,6 +63,6 @@ async def main():
 
 if __name__ == "__main__":
     # 환경변수 설정 
-    setup.set_config(r"config.yaml", "[0717 fair search app] evaluate llm")
+    fair_setup.set_env(r"config.yaml", "[0717 fair search app] evaluate llm")
     # main coroutine 실행 
     asyncio.run(main())

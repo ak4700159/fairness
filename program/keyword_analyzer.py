@@ -7,7 +7,7 @@ from langchain.evaluation.criteria import CriteriaEvalChain
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-import setup 
+import program.fair_setup as fair_setup 
 from operator import itemgetter
 
 """
@@ -19,7 +19,7 @@ from operator import itemgetter
 """
 class KeywordAnalyzer:
     def __init__(self):
-        self.llm = setup.load_gpt_model(r"config.yaml")
+        self.llm = fair_setup.load_gpt_model(r"config.yaml")
         self.criteria = {
             "relevance" : "만약 응답이 입력에 대해 카테고리 별로 분류한 응답인 경우, 추출된 카테고리가 사용자 프롬프트와 관련성이 있는가?",
             "diversity" : "만약 응답이 입력에 대해 카테고리 별로 분류한 응답인 경우, 카테고리 간 관점이 실제로 상충되는 입장인가?",
