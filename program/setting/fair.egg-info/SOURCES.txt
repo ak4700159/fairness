@@ -1,0 +1,15 @@
+setup.py
+setting/article.py
+setting/fair_setup.py
+setting/crawler/__init__.py
+setting/crawler/chosun_crawler.py
+setting/crawler/crawler.py
+setting/crawler/google_crawler.py
+setting/crawler/khan_crawler.py
+setting/crawler/korea_crawler.py
+setting/crawler/naver_crawler.py
+setting/fair.egg-info/PKG-INFO
+setting/fair.egg-info/SOURCES.txt
+setting/fair.egg-info/dependency_links.txt
+setting/fair.egg-info/requires.txt
+setting/fair.egg-info/top_level.txt

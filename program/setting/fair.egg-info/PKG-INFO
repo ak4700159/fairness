@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: fair
+Version: 0.0.1
+Requires-Python: >=3.12.0
+Requires-Dist: selenium==4.34.2
+Requires-Dist: newspaper3k==0.2.8
+Requires-Dist: pymysql==1.1.1
+Requires-Dist: seaborn==0.13.2
+Requires-Dist: matplotlib==3.10.3
+Requires-Dist: openapi==2.0.0
+Requires-Dist: langchain==0.3.26
+Requires-Dist: langchain-teddynote==0.3.45
+Dynamic: requires-dist
+Dynamic: requires-python
