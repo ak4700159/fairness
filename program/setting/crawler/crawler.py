@@ -47,7 +47,7 @@ class Crawler(ABC):
         for link_dict in self.article_links:
             for idx, url in enumerate(link_dict['links']):
                 article = self.extract_article_data(url=url, index=idx, page=link_dict['page'])
-                if article != None:
+                if article != None and len(article.content) > 100: 
                     self.results.append(article)
 
     # 수집한 데이터 저장하기
@@ -71,7 +71,6 @@ class Crawler(ABC):
 
     # 크롤링 실행  
     def run(self):
-
         # 드라이버 초기 세팅
         self.setup_driver()
         # 기사 링크 수집

@@ -20,7 +20,8 @@ class NaverCrawler(Crawler):
         # 기사링크 수집
         for i in range(self.max_pages):
             # 태그 + 클래스 속성을 통해 HTML 태그를 전부 선택
-            articles = self.driver.find_elements(By.CSS_SELECTOR, "a.OqRuWgaJW9JVSHu5Dl92.BAeT2rSB_v3C8l_Lu2U6")
+            # 네이버 속성은 이틀마다 변경됨
+            articles = self.driver.find_elements(By.CSS_SELECTOR, "a.C8LJzXMCRa_cK_HvWxbV.Kb5uSN_9Vb3uZOU_82fA")
             # {"page" : 페이지 인덱스, "links" : [링크 목록]}
             links = {"page" : i+1, "links" : []}
             # 선택된 태그의 속성(href)을 통해 기사 원본 링크 주소 추출
