@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 import time
 import re
-from crawler import Crawler
+from crawler.crawler import Crawler 
 from article import Article as DataArticle
 
 # https://search.khan.co.kr/?q=검색 키워드&media=khan&page=1&section=1&term=0&startDate=&endDate=&sort=1

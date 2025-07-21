@@ -34,9 +34,9 @@ class KoreaCrawler(Crawler):
         try:
             # 기사 본문 p 태그 리스트 추출
             content = self.driver.find_element(By.CSS_SELECTOR, "section#newsBody").text
-            # 텍스트만 추출 후 \n으로 연결
-            # content = "\n".join([p.text.strip() for p in paragraphs])
-            if content == "" or bool(re.fullmatch(r'\n*', content)): return None
+            # 추출된 본문 안에 내용이 공백 또는 개행 문자로만 이루어져 있는지 확인하는 정규식 표현 
+            if content == "" or bool(re.fullmatch(r'[ \n]*', content)): return None
+            # 개행 문자가 두 개 이상 노출 시 하나로 축약
             content = re.sub(r'\n{2,}', '\n', content)
         except:
             return None

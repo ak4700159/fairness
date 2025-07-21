@@ -14,9 +14,6 @@ from crawler.korea_crawler import KoreaCrawler
 from crawler.google_crawler import GoogleCrawler
 from crawler.naver_crawler import NaverCrawler
 
-# from mysql_connector import DatabaseConnector
-
-
 class ResponseJson(BaseModel):
     score: float = Field(..., description=" 기사글에 대해 부정적인 긍정적인, 중립적인지(알 수 없는, 모호한)를 판단하기 위해 -1(부정) ~ 0(중립) ~ 1(긍정)으로 수치(실수, 소수점 둘째자리까지만 고려)")
     reason: str = Field(..., description="score가 이렇게 나온 이유에 대한 설명")

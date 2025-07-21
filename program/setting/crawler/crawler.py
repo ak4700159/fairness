@@ -32,7 +32,7 @@ class Crawler(ABC):
         KST = timezone(timedelta(hours=9))
         kst_now = datetime.now(KST)
         self.search_datetime = kst_now.strftime("%Y-%m-%d %H:%M:%S")
-        print(f"✅{self.site} WebDriver 초기화 완료 {self.search_datetime}")
+        print(f"✅ {self.site} WebDriver 초기화 완료 {self.search_datetime}")
 
     @abstractmethod
     def collect_article_links(self):
@@ -68,10 +68,6 @@ class Crawler(ABC):
         with open(full_path, "w", encoding="utf-8") as f:
             json.dump(json_data, f, ensure_ascii=False, indent=2)
         print(f"✅ {len(json_data)}개 기사 파일 저장 완료: {full_path}")
-
-    # def save_to_database(self):
-    #     # 데이터베이스 호출 후 results 결과 파일 저장
-    #     pass
 
     # 크롤링 실행  
     def run(self):

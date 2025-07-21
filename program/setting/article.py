@@ -12,9 +12,9 @@ class Article:
         self.media = kwargs.get("media", "알 수 없음")
         # 기사 발행 시점
         self.datetime = kwargs.get("datetime", "")
+        KST = timezone(timedelta(hours=9))
+        kst_now = datetime.now(KST)
         if self.datetime == "":
-            KST = timezone(timedelta(hours=9))
-            kst_now = datetime.now(KST)
             self.datetime = kst_now.strftime("%Y-%m-%d %H:%M:%S")
 
         # 검색 시점 페이지 내 리스트 인덱스(1번부터 시작)
